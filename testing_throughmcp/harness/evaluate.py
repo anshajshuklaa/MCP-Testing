@@ -74,11 +74,14 @@ def parse_junit(path: Path) -> dict[str, str]:
     return outcomes
 
 
-def run_suite(suite: Path, bug: str | None = None, with_coverage: bool = False, timeout: int = 300) -> SuiteRun:
-    """Run pytest on ``suite`` in a subprocess, with ``bug`` switched on."""
+def run_suite(
+    suite: Path | list[Path], bug: str | None = None, with_coverage: bool = False, timeout: int = 300
+) -> SuiteRun:
+    """Run pytest on ``suite`` (one or more paths) in a subprocess, with ``bug`` switched on."""
+    paths = [str(p) for p in (suite if isinstance(suite, list) else [suite])]
     with tempfile.TemporaryDirectory() as tmp:
         junit = Path(tmp) / "junit.xml"
-        cmd = [sys.executable, "-m", "pytest", str(suite), "-q", "-p", "no:cacheprovider", f"--junitxml={junit}"]
+        cmd = [sys.executable, "-m", "pytest", *paths, "-q", "-p", "no:cacheprovider", f"--junitxml={junit}"]
         cov_json = Path(tmp) / "coverage.json"
         if with_coverage:
             cmd += ["--cov=finclusive", "--cov-branch", f"--cov-report=json:{cov_json}"]
@@ -109,12 +112,17 @@ def coverage_percent(cov: dict | None) -> tuple[float, float]:
     )
 
 
-def evaluate(suite: Path, bugs: list[str] | None = None, workers: int = 4) -> Evaluation:
+def _label(suite: Path | list[Path]) -> str:
+    paths = suite if isinstance(suite, list) else [suite]
+    return " + ".join(str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p) for p in paths)
+
+
+def evaluate(suite: Path | list[Path], bugs: list[str] | None = None, workers: int = 4) -> Evaluation:
     clean = run_suite(suite, with_coverage=True)
     trusted = set(clean.ids("passed"))
     line_cov, branch_cov = coverage_percent(clean.coverage)
     result = Evaluation(
-        suite=str(suite.relative_to(ROOT)) if suite.is_relative_to(ROOT) else str(suite),
+        suite=_label(suite),
         tests=len(clean.outcomes),
         passed=clean.ids("passed"),
         false_alarms=sorted(clean.ids("failed") + clean.ids("error")),
