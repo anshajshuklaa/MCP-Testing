@@ -33,8 +33,8 @@ from typing import Callable
 from harness.evaluate import ROOT, run_suite
 from harness.llm import litellm_complete
 
-SPEC = ROOT / "src" / "data" / "original_requirements" / "FinClusive_Original_Scenario.md"
-API = ROOT / "finclusive" / "API.md"
+SPEC = ROOT / "spec" / "FinClusive_Scenario.md"
+API = ROOT / "spec" / "API.md"
 HUMAN_SUITE = ROOT / "suites" / "human_baseline" / "test_human_baseline.py"
 
 ALLOWED_IMPORTS = {"pytest", "datetime", "decimal", "finclusive.testkit", "re"}

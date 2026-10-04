@@ -1,8 +1,0 @@
-{
-  "gap_analysis_report": {
-    "summary": "Failed to parse AI analysis as JSON",
-    "missing_scenarios": [],
-    "testing_mandate": "Manual review required",
-    "raw_analysis": "Your final answer must be the great and the most complete as possible, it must be outcome described."
-  }
-}

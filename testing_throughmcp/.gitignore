@@ -60,11 +60,8 @@ Thumbs.db
 htmlcov/
 .tox/
 
-# Generated data and outputs
-data/generated/
-data/results/
-dashboard_output/*.html
-!dashboard_output/README.md
+# Scratch suite written by MCP clients (commit it deliberately if you want to keep one)
+suites/mcp_client/
 
 # Docker
 .dockerignore

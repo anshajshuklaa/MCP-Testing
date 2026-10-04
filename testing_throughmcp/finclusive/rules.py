@@ -1,6 +1,6 @@
 """FinClusive business rules as pure functions.
 
-Every rule here comes from src/data/original_requirements/FinClusive_Original_Scenario.md.
+Every rule here comes from spec/FinClusive_Scenario.md.
 ``bug`` is the name of the seeded bug that is switched on (see bugs.py), or None.
 """
 

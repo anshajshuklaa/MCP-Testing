@@ -1,6 +1,6 @@
 """The 7 human-written baseline tests, translated to executable pytest.
 
-Source: src/data/original_requirements/human_baseline_tests_original.json.
+Source: spec/human_baseline_tests.json.
 Each test keeps the original id, steps and expected result; only the UI steps
 are replaced with the matching API calls.
 """

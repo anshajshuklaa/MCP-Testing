@@ -1,7 +1,7 @@
 # FinClusive API contract
 
 This is what a black-box test may rely on. The business rules themselves are in
-`src/data/original_requirements/FinClusive_Original_Scenario.md`.
+`spec/FinClusive_Scenario.md`.
 
 Errors are JSON `{"detail": "<message>"}`. A business-rule violation is **422**.
 Authenticated endpoints need `Authorization: Bearer <token>`; without it they return **401**.
