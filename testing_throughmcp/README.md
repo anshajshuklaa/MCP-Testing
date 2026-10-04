@@ -43,6 +43,10 @@ python -m harness.evaluate suites/human_baseline   # score one suite
 
 export GEMINI_API_KEY=...                          # or ANTHROPIC_API_KEY / OPENAI_API_KEY, or a local Ollama
 python -m harness.generate --model gemini/gemini-2.5-flash --out suites/ai_generated
+
+# Hugging Face Inference Providers (OpenAI-compatible router):
+export AITEST_API_BASE=https://router.huggingface.co/v1 AITEST_API_KEY=$HF_TOKEN
+python -m harness.generate --model openai/Qwen/Qwen2.5-Coder-32B-Instruct --out suites/ai_generated
 python -m harness.compare suites/human_baseline suites/ai_generated --json results/comparison.json
 
 uvicorn finclusive.app:app --reload                # browse the API at http://localhost:8000/docs

@@ -6,6 +6,12 @@ Uses litellm, so the model name picks the provider, for example:
     openai/gpt-4.1-mini            (OPENAI_API_KEY)
     ollama/qwen2.5-coder:7b        (local Ollama)
 Set the model with --model or the AITEST_MODEL environment variable.
+
+Any OpenAI-compatible endpoint works too, via AITEST_API_BASE and
+AITEST_API_KEY. For example, Hugging Face Inference Providers:
+    AITEST_API_BASE=https://router.huggingface.co/v1
+    AITEST_API_KEY=$HF_TOKEN
+    --model openai/Qwen/Qwen2.5-Coder-32B-Instruct
 """
 
 import os
@@ -26,6 +32,8 @@ def litellm_complete(model: str | None = None, temperature: float = 0.2) -> Comp
 
         response = litellm.completion(
             model=model,
+            api_base=os.environ.get("AITEST_API_BASE") or None,
+            api_key=os.environ.get("AITEST_API_KEY") or None,
             temperature=temperature,
             messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
         )
