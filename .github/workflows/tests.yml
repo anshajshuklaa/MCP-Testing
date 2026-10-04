@@ -16,6 +16,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install fastapi httpx pytest pytest-cov
+      - run: pip install fastapi httpx pytest pytest-cov mcp
       - run: python -m pytest -q
       - run: python -m harness.evaluate suites/human_baseline
