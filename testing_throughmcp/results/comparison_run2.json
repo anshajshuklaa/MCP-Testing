@@ -1,0 +1,223 @@
+[
+  {
+    "suite": "suites/human_baseline",
+    "tests": 7,
+    "passed": [
+      "suites.human_baseline.test_human_baseline::test_fp_001_full_payment_with_early_bird_bonus",
+      "suites.human_baseline.test_human_baseline::test_pp_001_partial_minimum_payment",
+      "suites.human_baseline.test_human_baseline::test_reg_001_registration_and_card_addition",
+      "suites.human_baseline.test_human_baseline::test_rew_001_redeem_minimum_points",
+      "suites.human_baseline.test_human_baseline::test_sec_001_otp_required_for_high_value_payment",
+      "suites.human_baseline.test_human_baseline::test_val_001_payment_below_minimum_rejected"
+    ],
+    "false_alarms": [],
+    "skipped": [
+      "suites.human_baseline.test_human_baseline::test_ap_001_monthly_auto_pay_bonus"
+    ],
+    "line_coverage": 82.0,
+    "branch_coverage": 50.0,
+    "bugs_caught": {
+      "min_payment_99": [
+        "suites.human_baseline.test_human_baseline::test_val_001_payment_below_minimum_rejected"
+      ],
+      "otp_threshold_50k": [
+        "suites.human_baseline.test_human_baseline::test_sec_001_otp_required_for_high_value_payment"
+      ],
+      "redeem_rate_10": [
+        "suites.human_baseline.test_human_baseline::test_rew_001_redeem_minimum_points"
+      ]
+    },
+    "bugs_missed": [
+      "daily_limit_unchecked",
+      "duplicate_not_blocked",
+      "early_bonus_strict",
+      "expired_card_accepted",
+      "full_bonus_on_minimum",
+      "luhn_unchecked",
+      "max_payment_unchecked",
+      "points_round_half_up",
+      "redeem_below_minimum",
+      "silver_from_1001",
+      "sixth_card_allowed",
+      "three_decimal_amounts",
+      "weak_password_accepted"
+    ],
+    "bug_detection_rate": 0.1875
+  },
+  {
+    "suite": "suites/ai_generated",
+    "tests": 29,
+    "passed": [
+      "suites.ai_generated.test_ai_generated::test_card_expiry_validation_current_month_valid",
+      "suites.ai_generated.test_ai_generated::test_card_expiry_validation_future_only",
+      "suites.ai_generated.test_ai_generated::test_card_limit_maximum_cards",
+      "suites.ai_generated.test_ai_generated::test_card_number_validation_luhn",
+      "suites.ai_generated.test_ai_generated::test_daily_payment_exceeds_limit_rejected",
+      "suites.ai_generated.test_ai_generated::test_daily_payment_limit_boundary",
+      "suites.ai_generated.test_ai_generated::test_different_amount_to_same_card_allowed",
+      "suites.ai_generated.test_ai_generated::test_duplicate_card_prevention",
+      "suites.ai_generated.test_ai_generated::test_duplicate_payment_blocked_same_amount_same_card",
+      "suites.ai_generated.test_ai_generated::test_mobile_validation_invalid_numbers",
+      "suites.ai_generated.test_ai_generated::test_otp_not_required_for_low_value_payment",
+      "suites.ai_generated.test_ai_generated::test_otp_required_for_high_value_payment_boundary",
+      "suites.ai_generated.test_ai_generated::test_payment_above_maximum_single_amount_rejected",
+      "suites.ai_generated.test_ai_generated::test_payment_below_minimum_rejected",
+      "suites.ai_generated.test_ai_generated::test_payment_insufficient_wallet_balance_rejected",
+      "suites.ai_generated.test_ai_generated::test_payment_maximum_single_amount_boundary",
+      "suites.ai_generated.test_ai_generated::test_payment_minimum_amount_boundary",
+      "suites.ai_generated.test_ai_generated::test_payment_sufficient_wallet_balance_accepted",
+      "suites.ai_generated.test_ai_generated::test_redemption_below_minimum_rejected",
+      "suites.ai_generated.test_ai_generated::test_redemption_insufficient_points_rejected",
+      "suites.ai_generated.test_ai_generated::test_redemption_minimum_points_boundary",
+      "suites.ai_generated.test_ai_generated::test_reward_early_payment_bonus_boundary",
+      "suites.ai_generated.test_ai_generated::test_reward_full_payment_bonus",
+      "suites.ai_generated.test_ai_generated::test_reward_no_early_payment_bonus_on_due_date",
+      "suites.ai_generated.test_ai_generated::test_reward_no_full_payment_bonus_partial_payment",
+      "suites.ai_generated.test_ai_generated::test_reward_tier_bronze",
+      "suites.ai_generated.test_ai_generated::test_reward_tier_gold",
+      "suites.ai_generated.test_ai_generated::test_reward_tier_silver_lower_bound",
+      "suites.ai_generated.test_ai_generated::test_reward_tier_silver_upper_bound"
+    ],
+    "false_alarms": [],
+    "skipped": [],
+    "line_coverage": 87.0,
+    "branch_coverage": 67.0,
+    "bugs_caught": {
+      "duplicate_not_blocked": [
+        "suites.ai_generated.test_ai_generated::test_duplicate_payment_blocked_same_amount_same_card"
+      ],
+      "early_bonus_strict": [
+        "suites.ai_generated.test_ai_generated::test_reward_early_payment_bonus_boundary"
+      ],
+      "expired_card_accepted": [
+        "suites.ai_generated.test_ai_generated::test_card_expiry_validation_future_only"
+      ],
+      "full_bonus_on_minimum": [
+        "suites.ai_generated.test_ai_generated::test_reward_no_full_payment_bonus_partial_payment"
+      ],
+      "luhn_unchecked": [
+        "suites.ai_generated.test_ai_generated::test_card_number_validation_luhn"
+      ],
+      "max_payment_unchecked": [
+        "suites.ai_generated.test_ai_generated::test_payment_above_maximum_single_amount_rejected"
+      ],
+      "min_payment_99": [
+        "suites.ai_generated.test_ai_generated::test_payment_below_minimum_rejected"
+      ],
+      "otp_threshold_50k": [
+        "suites.ai_generated.test_ai_generated::test_otp_required_for_high_value_payment_boundary"
+      ],
+      "redeem_below_minimum": [
+        "suites.ai_generated.test_ai_generated::test_redemption_below_minimum_rejected"
+      ],
+      "silver_from_1001": [
+        "suites.ai_generated.test_ai_generated::test_reward_tier_silver_lower_bound"
+      ],
+      "sixth_card_allowed": [
+        "suites.ai_generated.test_ai_generated::test_card_limit_maximum_cards"
+      ]
+    },
+    "bugs_missed": [
+      "daily_limit_unchecked",
+      "points_round_half_up",
+      "redeem_rate_10",
+      "three_decimal_amounts",
+      "weak_password_accepted"
+    ],
+    "bug_detection_rate": 0.6875
+  },
+  {
+    "suite": "suites/human_baseline + suites/ai_generated",
+    "tests": 36,
+    "passed": [
+      "suites.ai_generated.test_ai_generated::test_card_expiry_validation_current_month_valid",
+      "suites.ai_generated.test_ai_generated::test_card_expiry_validation_future_only",
+      "suites.ai_generated.test_ai_generated::test_card_limit_maximum_cards",
+      "suites.ai_generated.test_ai_generated::test_card_number_validation_luhn",
+      "suites.ai_generated.test_ai_generated::test_daily_payment_exceeds_limit_rejected",
+      "suites.ai_generated.test_ai_generated::test_daily_payment_limit_boundary",
+      "suites.ai_generated.test_ai_generated::test_different_amount_to_same_card_allowed",
+      "suites.ai_generated.test_ai_generated::test_duplicate_card_prevention",
+      "suites.ai_generated.test_ai_generated::test_duplicate_payment_blocked_same_amount_same_card",
+      "suites.ai_generated.test_ai_generated::test_mobile_validation_invalid_numbers",
+      "suites.ai_generated.test_ai_generated::test_otp_not_required_for_low_value_payment",
+      "suites.ai_generated.test_ai_generated::test_otp_required_for_high_value_payment_boundary",
+      "suites.ai_generated.test_ai_generated::test_payment_above_maximum_single_amount_rejected",
+      "suites.ai_generated.test_ai_generated::test_payment_below_minimum_rejected",
+      "suites.ai_generated.test_ai_generated::test_payment_insufficient_wallet_balance_rejected",
+      "suites.ai_generated.test_ai_generated::test_payment_maximum_single_amount_boundary",
+      "suites.ai_generated.test_ai_generated::test_payment_minimum_amount_boundary",
+      "suites.ai_generated.test_ai_generated::test_payment_sufficient_wallet_balance_accepted",
+      "suites.ai_generated.test_ai_generated::test_redemption_below_minimum_rejected",
+      "suites.ai_generated.test_ai_generated::test_redemption_insufficient_points_rejected",
+      "suites.ai_generated.test_ai_generated::test_redemption_minimum_points_boundary",
+      "suites.ai_generated.test_ai_generated::test_reward_early_payment_bonus_boundary",
+      "suites.ai_generated.test_ai_generated::test_reward_full_payment_bonus",
+      "suites.ai_generated.test_ai_generated::test_reward_no_early_payment_bonus_on_due_date",
+      "suites.ai_generated.test_ai_generated::test_reward_no_full_payment_bonus_partial_payment",
+      "suites.ai_generated.test_ai_generated::test_reward_tier_bronze",
+      "suites.ai_generated.test_ai_generated::test_reward_tier_gold",
+      "suites.ai_generated.test_ai_generated::test_reward_tier_silver_lower_bound",
+      "suites.ai_generated.test_ai_generated::test_reward_tier_silver_upper_bound",
+      "suites.human_baseline.test_human_baseline::test_fp_001_full_payment_with_early_bird_bonus",
+      "suites.human_baseline.test_human_baseline::test_pp_001_partial_minimum_payment",
+      "suites.human_baseline.test_human_baseline::test_reg_001_registration_and_card_addition",
+      "suites.human_baseline.test_human_baseline::test_rew_001_redeem_minimum_points",
+      "suites.human_baseline.test_human_baseline::test_sec_001_otp_required_for_high_value_payment",
+      "suites.human_baseline.test_human_baseline::test_val_001_payment_below_minimum_rejected"
+    ],
+    "false_alarms": [],
+    "skipped": [
+      "suites.human_baseline.test_human_baseline::test_ap_001_monthly_auto_pay_bonus"
+    ],
+    "line_coverage": 87.3,
+    "branch_coverage": 67.0,
+    "bugs_caught": {
+      "duplicate_not_blocked": [
+        "suites.ai_generated.test_ai_generated::test_duplicate_payment_blocked_same_amount_same_card"
+      ],
+      "early_bonus_strict": [
+        "suites.ai_generated.test_ai_generated::test_reward_early_payment_bonus_boundary"
+      ],
+      "expired_card_accepted": [
+        "suites.ai_generated.test_ai_generated::test_card_expiry_validation_future_only"
+      ],
+      "full_bonus_on_minimum": [
+        "suites.ai_generated.test_ai_generated::test_reward_no_full_payment_bonus_partial_payment"
+      ],
+      "luhn_unchecked": [
+        "suites.ai_generated.test_ai_generated::test_card_number_validation_luhn"
+      ],
+      "max_payment_unchecked": [
+        "suites.ai_generated.test_ai_generated::test_payment_above_maximum_single_amount_rejected"
+      ],
+      "min_payment_99": [
+        "suites.ai_generated.test_ai_generated::test_payment_below_minimum_rejected",
+        "suites.human_baseline.test_human_baseline::test_val_001_payment_below_minimum_rejected"
+      ],
+      "otp_threshold_50k": [
+        "suites.ai_generated.test_ai_generated::test_otp_required_for_high_value_payment_boundary",
+        "suites.human_baseline.test_human_baseline::test_sec_001_otp_required_for_high_value_payment"
+      ],
+      "redeem_below_minimum": [
+        "suites.ai_generated.test_ai_generated::test_redemption_below_minimum_rejected"
+      ],
+      "redeem_rate_10": [
+        "suites.human_baseline.test_human_baseline::test_rew_001_redeem_minimum_points"
+      ],
+      "silver_from_1001": [
+        "suites.ai_generated.test_ai_generated::test_reward_tier_silver_lower_bound"
+      ],
+      "sixth_card_allowed": [
+        "suites.ai_generated.test_ai_generated::test_card_limit_maximum_cards"
+      ]
+    },
+    "bugs_missed": [
+      "daily_limit_unchecked",
+      "points_round_half_up",
+      "three_decimal_amounts",
+      "weak_password_accepted"
+    ],
+    "bug_detection_rate": 0.75
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "model": "openai/Qwen/Qwen3-Coder-480B-A35B-Instruct",
+  "tests_generated": 23,
+  "tests_kept": 20,
+  "repair_rounds_used": 2,
+  "removed_tests": [
+    "test_daily_payment_limit",
+    "test_payment_amount_boundaries",
+    "test_transaction_history_filtering"
+  ],
+  "note": "Before the weak-assertion check existed."
+}

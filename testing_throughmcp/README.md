@@ -18,19 +18,24 @@ The seeded bugs are one-rule mistakes a reviewer would care about: points rounde
 
 ## Results
 
-| Metric | Human baseline (7 tests) |
-|---|---|
-| Tests run | 6 (AP-001 skipped) |
-| False alarms | 0 |
-| Line / branch coverage | 82.0% / 50.0% |
-| Seeded bugs caught | **3 / 16 (19%)** |
+AI suites were written by Qwen3-Coder-480B through Hugging Face Inference Providers.
 
-From `results/human_baseline.json`. AI-generated results go here once `harness.compare` has been run with a model (see below).
+| Metric | Human baseline | AI run 1 | AI run 2 | Human + AI run 2 |
+|---|---|---|---|---|
+| Tests kept | 6 (AP-001 skipped) | 20 | 29 | 35 |
+| False alarms | 0 | 0 | 0 | 0 |
+| Line coverage | 82.0% | 89.9% | 87.0% | 87.3% |
+| Branch coverage | 50.0% | 70.5% | 67.0% | 67.0% |
+| Seeded bugs caught | **3/16 (19%)** | 8/16 (50%) | **11/16 (69%)** | **12/16 (75%)** |
 
-What the human baseline shows:
-- **AP-001 tests an "Auto-Pay bonus" the spec never defines**, so it can't be executed. That's a requirements-traceability gap.
-- **PP-001 pays ₹100 against a ₹1,250 minimum due**, so it never exercises the "no full-payment bonus on a minimum payment" rule.
-- **Line coverage flatters.** 82% of lines ran, but only 3 of 16 wrong behaviours would be noticed.
+Run 2 added the weak-assertion check described below. Raw numbers are in `results/`; the suite in `suites/ai_generated/` is run 2.
+
+What the numbers show:
+- **The human baseline is thin.** AP-001 tests an "Auto-Pay bonus" the spec never defines, and PP-001 pays ₹100 against a ₹1,250 minimum due, so it never exercises the bonus rule it was written for.
+- **Line coverage flatters.** 82% of lines ran under the human suite, but only 3 of 16 wrong behaviours would be noticed. AI run 1 had the *highest* coverage and caught fewer bugs than run 2.
+- **The repair loop taught the model to cheat.** In run 1, tests that failed were "repaired" into `assert points_earned > 0` and `status_code in [401, 422]`, which pass on any app. `harness.generate` now flags tests with no exact assertion (`weak_tests`), sends them back with the instruction to assert the spec's exact value, and removes tests that assert nothing. That took bug detection from 8/16 to 11/16.
+- **Still missed by every suite:** `daily_limit_unchecked`, `points_round_half_up`, `three_decimal_amounts`, `weak_password_accepted`. The AI wrote tests for some of these rules, but they were either pruned for failing or left loose.
+- **Caveat:** two runs of one model is a small sample, and run 2's repair stopped after one round on an infrastructure error. Treat the gap as indicative, not precise.
 
 ## Run it
 
@@ -44,9 +49,9 @@ python -m harness.evaluate suites/human_baseline   # score one suite
 export GEMINI_API_KEY=...                          # or ANTHROPIC_API_KEY / OPENAI_API_KEY, or a local Ollama
 python -m harness.generate --model gemini/gemini-2.5-flash --out suites/ai_generated
 
-# Hugging Face Inference Providers (OpenAI-compatible router):
+# Hugging Face Inference Providers (OpenAI-compatible router), as used for the results above:
 export AITEST_API_BASE=https://router.huggingface.co/v1 AITEST_API_KEY=$HF_TOKEN
-python -m harness.generate --model openai/Qwen/Qwen2.5-Coder-32B-Instruct --out suites/ai_generated
+python -m harness.generate --model openai/Qwen/Qwen3-Coder-480B-A35B-Instruct --out suites/ai_generated
 python -m harness.compare suites/human_baseline suites/ai_generated --json results/comparison.json
 
 uvicorn finclusive.app:app --reload                # browse the API at http://localhost:8000/docs
@@ -66,7 +71,7 @@ Tools: `get_product_docs`, `write_test_module`, `run_suite_on_correct_app`, `sco
 
 - **Black-box generation.** The generator never sees `finclusive/` source, because the seeded-bug switches live there. It gets the spec, `spec/API.md` and the human tests.
 - **Generated code is untrusted.** It must parse, may import only `pytest`, `datetime`, `decimal`, `re` and `finclusive.testkit`, and may not call `exec`/`eval`/`open`. This is a guardrail, not a sandbox; run unknown models in a container.
-- **Fail loudly.** If the model's output can't be used, generation errors out. Tests that still fail after repair are removed and listed, never replaced with placeholders.
+- **Fail loudly.** If the model's output can't be used, generation errors out. Tests that still fail after repair, or assert nothing, are removed and listed, never replaced with placeholders. Loose tests that remain are listed as `weak_tests`.
 - **Limitations.** 16 hand-picked bugs is a small sample, and they were chosen by the same author as the app. State is in-memory, so there are no concurrency or persistence bugs. LLM results vary between runs, so compare several runs.
 
 ## Layout

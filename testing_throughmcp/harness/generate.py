@@ -66,20 +66,32 @@ Rules:
 - Write about {n_tests} tests, covering as many different spec rules as you can.
 """
 
-REPAIR = """These tests fail against a correct implementation of the spec, so the tests are wrong:
-either the expectation misreads the spec, or the API is used incorrectly.
-
-{failures}
+REPAIR = """{problems}
 
 Here is the full module:
 ```python
 {code}
 ```
 
-Return the whole module again with the failing tests fixed to match the spec and the API
-contract. Keep every passing test unchanged. If you cannot tell what the spec requires for a
-test, delete that test.
+Return the whole module again with those tests fixed to match the spec and the API contract.
+Keep every other test unchanged. Never make a test pass by loosening it (`> 0`, accepting
+several status codes, removing asserts): work out the exact value the spec requires and assert
+that. If you cannot tell what the spec requires for a test, delete that test.
 """
+
+FAILING = """These tests fail against a correct implementation of the spec, so the tests are wrong:
+either the expectation misreads the spec, or the API is used incorrectly.
+
+{details}
+"""
+
+WEAK = """These tests have no exact assertion, so they would pass against a buggy app too:
+{names}
+Each needs at least one exact check, e.g. `== 1200` points, `== 422` with the spec's message,
+`== "Silver"`.
+"""
+
+LOOSE_OPS = (ast.Gt, ast.GtE, ast.Lt, ast.LtE, ast.NotEq, ast.IsNot)
 
 
 class UnsafeCode(ValueError):
@@ -94,6 +106,8 @@ class GenerationReport:
     tests_kept: int = 0
     repair_rounds_used: int = 0
     removed_tests: list[str] = field(default_factory=list)
+    weak_tests: list[str] = field(default_factory=list)  # kept, but no exact assertion
+    repair_error: str | None = None  # why repair stopped early, if it did
 
 
 def extract_code(reply: str) -> str:
@@ -128,6 +142,53 @@ def check_code(code: str) -> ast.Module:
 
 def collect_test_names(code: str) -> list[str]:
     return [n.name for n in ast.parse(code).body if isinstance(n, ast.FunctionDef) and n.name.startswith("test_")]
+
+
+def _is_success_check(node: ast.Compare) -> bool:
+    """`r.status_code == 200/201` style asserts."""
+    left = node.left
+    return (
+        isinstance(left, ast.Attribute)
+        and left.attr == "status_code"
+        and all(isinstance(c, ast.Constant) and isinstance(c.value, int) and 200 <= c.value < 300 for c in node.comparators)
+    )
+
+
+def _is_exact(node: ast.expr) -> bool:
+    """An assert expression that pins a value: ==, is, `in` one value, or a bare truthy check."""
+    if isinstance(node, ast.BoolOp):
+        return any(_is_exact(v) for v in node.values)
+    if not isinstance(node, ast.Compare):
+        return not isinstance(node, ast.Constant)  # `assert x` is exact enough; `assert True` is not
+    if _is_success_check(node):
+        return False  # "the request worked" is setup, not a check of the rule
+    for op, right in zip(node.ops, node.comparators):
+        if isinstance(op, LOOSE_OPS):
+            continue
+        if isinstance(op, ast.In) and isinstance(right, (ast.List, ast.Tuple, ast.Set)) and len(right.elts) > 1:
+            continue
+        return True
+    return False
+
+
+def weak_tests(code: str) -> list[str]:
+    """Tests with no assertion that pins an exact value (pytest.raises counts as exact)."""
+    weak = []
+    for fn in ast.parse(code).body:
+        if not (isinstance(fn, ast.FunctionDef) and fn.name.startswith("test_")):
+            continue
+        asserts = [n for n in ast.walk(fn) if isinstance(n, ast.Assert)]
+        raises = any(
+            isinstance(n, ast.Attribute) and n.attr == "raises" for n in ast.walk(fn)
+        )
+        if not raises and not any(_is_exact(a.test) for a in asserts):
+            weak.append(fn.name)
+    return weak
+
+
+def _has_assert(code: str, name: str) -> bool:
+    fn = next(n for n in ast.parse(code).body if isinstance(n, ast.FunctionDef) and n.name == name)
+    return any(isinstance(n, ast.Assert) for n in ast.walk(fn)) or "raises" in ast.unparse(fn)
 
 
 def remove_tests(code: str, names: set[str]) -> str:
@@ -178,23 +239,31 @@ def generate(
     report.tests_generated = len(collect_test_names(code))
     module.write_text(code)
 
-    failing = failing_tests(module)
-    while failing and report.repair_rounds_used < repair_rounds:
+    failing, weak = failing_tests(module), weak_tests(code)
+    while (failing or weak) and report.repair_rounds_used < repair_rounds:
         report.repair_rounds_used += 1
-        reply = complete(SYSTEM, REPAIR.format(failures=failure_details(module, failing), code=code))
+        problems = []
+        if failing:
+            problems.append(FAILING.format(details=failure_details(module, failing)))
+        if weak:
+            problems.append(WEAK.format(names="\n".join(f"- {n}" for n in weak)))
         try:
-            candidate = extract_code(reply)
+            candidate = extract_code(complete(SYSTEM, REPAIR.format(problems="\n".join(problems), code=code)))
             check_code(candidate)
-        except (ValueError, UnsafeCode):
-            break  # keep the last good module and prune below
+        except Exception as e:  # unusable reply or provider error: keep the last good module
+            report.repair_error = f"{type(e).__name__}: {str(e)[:200]}"
+            break
         code = candidate
         module.write_text(code)
-        failing = failing_tests(module)
+        failing, weak = failing_tests(module), weak_tests(code)
 
-    if failing:
-        report.removed_tests = failing
-        code = remove_tests(code, set(failing))
+    # Still failing, or asserting nothing at all: remove. Loose but real checks stay, flagged.
+    empty = [n for n in weak if not _has_assert(code, n)]
+    if failing or empty:
+        report.removed_tests = sorted(set(failing) | set(empty))
+        code = remove_tests(code, set(report.removed_tests))
         module.write_text(code)
+    report.weak_tests = weak_tests(code)
     report.tests_kept = len(collect_test_names(code))
     return report
 

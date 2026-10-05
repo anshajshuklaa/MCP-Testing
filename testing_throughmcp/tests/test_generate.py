@@ -2,7 +2,15 @@ from pathlib import Path
 
 import pytest
 
-from harness.generate import UnsafeCode, check_code, collect_test_names, extract_code, generate, remove_tests
+from harness.generate import (
+    UnsafeCode,
+    check_code,
+    collect_test_names,
+    extract_code,
+    generate,
+    remove_tests,
+    weak_tests,
+)
 from harness.llm import fixed_responses
 
 GOOD = '''
@@ -88,3 +96,48 @@ def test_extract_code_takes_the_python_block():
 
 def test_remove_tests_keeps_the_rest():
     assert collect_test_names(remove_tests(GOOD + WRONG, {"test_tier_wrong"})) == ["test_min_payment_rejects_99"]
+
+
+LOOSE = '''
+
+def test_points_loose(fc):
+    """Base points."""
+    fc.register()
+    card = fc.add_card()
+    fc.set_bill(card, 5000, 250, date(2026, 1, 3))
+    r = fc.pay(card, 150)
+    assert r.status_code == 201
+    assert r.json()["points_earned"] > 0
+
+
+def test_nothing(fc):
+    """Server errors."""
+    pass
+'''
+
+TIGHT = '''
+
+def test_points_exact(fc):
+    """Base points: 1 per 100, rounded down."""
+    fc.register()
+    card = fc.add_card()
+    fc.set_bill(card, 5000, 250, date(2026, 1, 3))
+    assert fc.pay(card, 150).json()["points_earned"] == 1
+'''
+
+
+def test_weak_tests_flags_loose_and_empty_tests():
+    assert weak_tests(GOOD + LOOSE) == ["test_points_loose", "test_nothing"]
+    assert weak_tests(GOOD + TIGHT) == []
+    assert weak_tests("def test_codes(fc):\n    assert fc.get('/x').status_code in [401, 422]\n") == ["test_codes"]
+
+
+def test_weak_tests_go_back_for_repair_and_empty_ones_are_dropped(tmp_path: Path):
+    llm = fixed_responses(block(GOOD + LOOSE), block(GOOD + TIGHT + LOOSE))
+
+    report = generate(tmp_path, llm, n_tests=3, repair_rounds=1)
+
+    assert "test_points_loose" in llm.prompts[1][1] and "no exact assertion" in llm.prompts[1][1]
+    assert report.removed_tests == ["test_nothing"]
+    assert report.weak_tests == ["test_points_loose"]
+    assert report.tests_kept == 3

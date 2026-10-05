@@ -11,10 +11,11 @@ Any OpenAI-compatible endpoint works too, via AITEST_API_BASE and
 AITEST_API_KEY. For example, Hugging Face Inference Providers:
     AITEST_API_BASE=https://router.huggingface.co/v1
     AITEST_API_KEY=$HF_TOKEN
-    --model openai/Qwen/Qwen2.5-Coder-32B-Instruct
+    --model openai/Qwen/Qwen3-Coder-480B-A35B-Instruct
 """
 
 import os
+import time
 from typing import Callable, Protocol
 
 DEFAULT_MODEL = "gemini/gemini-2.5-flash"
@@ -24,17 +25,31 @@ class Complete(Protocol):
     def __call__(self, system: str, user: str) -> str: ...
 
 
-def litellm_complete(model: str | None = None, temperature: float = 0.2) -> Complete:
+def litellm_complete(model: str | None = None, temperature: float = 0.2, retries: int = 3) -> Complete:
     model = model or os.environ.get("AITEST_MODEL") or DEFAULT_MODEL
 
     def complete(system: str, user: str) -> str:
         import litellm  # imported lazily so tests and evaluation don't need it
 
+        # Providers return transient 5xx and gateway timeouts on long generations.
+        transient = (litellm.exceptions.InternalServerError, litellm.exceptions.Timeout,
+                     litellm.exceptions.ServiceUnavailableError, litellm.exceptions.APIConnectionError)
+        for attempt in range(retries + 1):
+            try:
+                return _call(litellm, system, user)
+            except transient:
+                if attempt == retries:
+                    raise
+                time.sleep(5 * 2**attempt)
+        raise AssertionError("unreachable")
+
+    def _call(litellm, system: str, user: str) -> str:
         response = litellm.completion(
             model=model,
             api_base=os.environ.get("AITEST_API_BASE") or None,
             api_key=os.environ.get("AITEST_API_KEY") or None,
             temperature=temperature,
+            timeout=600,
             messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
         )
         text = response.choices[0].message.content
