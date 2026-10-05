@@ -1,0 +1,45 @@
+{
+  "suite": "suites/human_baseline",
+  "tests": 7,
+  "passed": [
+    "suites.human_baseline.test_human_baseline::test_fp_001_full_payment_with_early_bird_bonus",
+    "suites.human_baseline.test_human_baseline::test_pp_001_partial_minimum_payment",
+    "suites.human_baseline.test_human_baseline::test_reg_001_registration_and_card_addition",
+    "suites.human_baseline.test_human_baseline::test_rew_001_redeem_minimum_points",
+    "suites.human_baseline.test_human_baseline::test_sec_001_otp_required_for_high_value_payment",
+    "suites.human_baseline.test_human_baseline::test_val_001_payment_below_minimum_rejected"
+  ],
+  "false_alarms": [],
+  "skipped": [
+    "suites.human_baseline.test_human_baseline::test_ap_001_monthly_auto_pay_bonus"
+  ],
+  "line_coverage": 82.0,
+  "branch_coverage": 50.0,
+  "bugs_caught": {
+    "min_payment_99": [
+      "suites.human_baseline.test_human_baseline::test_val_001_payment_below_minimum_rejected"
+    ],
+    "otp_threshold_50k": [
+      "suites.human_baseline.test_human_baseline::test_sec_001_otp_required_for_high_value_payment"
+    ],
+    "redeem_rate_10": [
+      "suites.human_baseline.test_human_baseline::test_rew_001_redeem_minimum_points"
+    ]
+  },
+  "bugs_missed": [
+    "daily_limit_unchecked",
+    "duplicate_not_blocked",
+    "early_bonus_strict",
+    "expired_card_accepted",
+    "full_bonus_on_minimum",
+    "luhn_unchecked",
+    "max_payment_unchecked",
+    "points_round_half_up",
+    "redeem_below_minimum",
+    "silver_from_1001",
+    "sixth_card_allowed",
+    "three_decimal_amounts",
+    "weak_password_accepted"
+  ],
+  "bug_detection_rate": 0.1875
+}

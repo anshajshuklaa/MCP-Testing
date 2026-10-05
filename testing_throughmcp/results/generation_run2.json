@@ -1,0 +1,23 @@
+{
+  "model": "openai/Qwen/Qwen3-Coder-480B-A35B-Instruct",
+  "output": "suites/ai_generated/test_ai_generated.py",
+  "tests_generated": 33,
+  "tests_kept": 29,
+  "repair_rounds_used": 1,
+  "removed_tests": [
+    "test_mobile_validation_valid_numbers",
+    "test_password_validation_rules",
+    "test_pin_validation_length",
+    "test_reward_base_points_calculation"
+  ],
+  "weak_tests": [
+    "test_card_expiry_validation_current_month_valid",
+    "test_payment_minimum_amount_boundary",
+    "test_payment_maximum_single_amount_boundary",
+    "test_daily_payment_limit_boundary",
+    "test_otp_not_required_for_low_value_payment",
+    "test_different_amount_to_same_card_allowed",
+    "test_payment_sufficient_wallet_balance_accepted"
+  ],
+  "repair_error": "Exception: tenacity import failed please run `pip install tenacity`. ErrorNo module named 'tenacity'"
+}
